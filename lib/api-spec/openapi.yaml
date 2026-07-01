@@ -1,0 +1,745 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: AEGIS - AI Energy Geopolitical Intelligence System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: overview
+    description: System overview and status
+  - name: risk
+    description: Geopolitical risk intelligence
+  - name: scenarios
+    description: Disruption scenario modelling
+  - name: procurement
+    description: Adaptive procurement orchestration
+  - name: reserve
+    description: Strategic reserve optimization
+  - name: digital-twin
+    description: Supply chain digital twin
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Overview ───────────────────────────────────────────────
+  /overview/summary:
+    get:
+      operationId: getOverviewSummary
+      tags: [overview]
+      summary: System overview summary — status, module metrics, sparklines
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OverviewSummary"
+
+  /overview/run-simulation:
+    post:
+      operationId: runFullSimulation
+      tags: [overview]
+      summary: Trigger full disruption simulation across all modules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SimulationInput"
+      responses:
+        "200":
+          description: Simulation results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimulationResult"
+
+  # ─── Risk Intelligence ───────────────────────────────────────
+  /risk/scores:
+    get:
+      operationId: getRiskScores
+      tags: [risk]
+      summary: Get disruption probability scores per corridor and supplier
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskScore"
+
+  /risk/scores/refresh:
+    post:
+      operationId: refreshRiskScores
+      tags: [risk]
+      summary: Simulate a risk score refresh (re-run LLM signal extraction)
+      responses:
+        "200":
+          description: Updated risk scores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskScore"
+
+  /risk/signals:
+    get:
+      operationId: getNewsSignals
+      tags: [risk]
+      summary: Get timestamped news and geopolitical signals log
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewsSignal"
+
+  /risk/suppliers:
+    get:
+      operationId: getSupplierRisks
+      tags: [risk]
+      summary: Get per-supplier risk ratings
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SupplierRisk"
+
+  # ─── Scenario Modeller ───────────────────────────────────────
+  /scenarios:
+    get:
+      operationId: getScenarios
+      tags: [scenarios]
+      summary: List available disruption scenarios
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Scenario"
+
+  /scenarios/simulate:
+    post:
+      operationId: runScenario
+      tags: [scenarios]
+      summary: Run a disruption scenario simulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScenarioInput"
+      responses:
+        "200":
+          description: Scenario impact results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioResult"
+
+  # ─── Procurement Orchestrator ─────────────────────────────────
+  /procurement/recommendations:
+    get:
+      operationId: getProcurementRecommendations
+      tags: [procurement]
+      summary: Get ranked procurement recommendations
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProcurementRecommendation"
+
+  /procurement/run:
+    post:
+      operationId: runProcurementOrchestrator
+      tags: [procurement]
+      summary: Run the LLM-driven procurement orchestrator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcurementInput"
+      responses:
+        "200":
+          description: Updated recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProcurementRecommendation"
+
+  /procurement/sources:
+    get:
+      operationId: getCrudeSources
+      tags: [procurement]
+      summary: List available crude oil sources
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CrudeSource"
+
+  # ─── Reserve Optimizer ────────────────────────────────────────
+  /reserve/status:
+    get:
+      operationId: getReserveStatus
+      tags: [reserve]
+      summary: Get current strategic reserve status and optimization plan
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReserveStatus"
+
+  /reserve/optimize:
+    post:
+      operationId: optimizeReserve
+      tags: [reserve]
+      summary: Run reserve optimization under a given scenario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReserveOptimizeInput"
+      responses:
+        "200":
+          description: Optimization result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReserveOptimizeResult"
+
+  /reserve/drawdown-schedule:
+    get:
+      operationId: getDrawdownSchedule
+      tags: [reserve]
+      summary: Get SPR drawdown schedule timeline
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DrawdownDataPoint"
+
+  # ─── Digital Twin ─────────────────────────────────────────────
+  /digital-twin/nodes:
+    get:
+      operationId: getDigitalTwinNodes
+      tags: [digital-twin]
+      summary: Get map nodes (ports, refineries, storage hubs)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MapNode"
+
+  /digital-twin/corridors:
+    get:
+      operationId: getDigitalTwinCorridors
+      tags: [digital-twin]
+      summary: Get shipping corridors with risk levels
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShippingCorridor"
+
+  /digital-twin/whatif:
+    post:
+      operationId: runWhatIf
+      tags: [digital-twin]
+      summary: Run a what-if disruption on a node or corridor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WhatIfInput"
+      responses:
+        "200":
+          description: What-if impact result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhatIfResult"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    # ── Overview ──────────────────────────────────────────────────
+    OverviewSummary:
+      type: object
+      required: [systemState, riskScore, reserveDays, activeScenario, moduleSummaries, lastUpdated]
+      properties:
+        systemState:
+          type: string
+          enum: [NOMINAL, ELEVATED, CRITICAL]
+        riskScore:
+          type: number
+        reserveDays:
+          type: number
+        activeScenario:
+          type: ["string", "null"]
+        moduleSummaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModuleSummary"
+        lastUpdated:
+          type: string
+
+    ModuleSummary:
+      type: object
+      required: [module, headline, value, unit, trend, sparkline]
+      properties:
+        module:
+          type: string
+        headline:
+          type: string
+        value:
+          type: number
+        unit:
+          type: string
+        trend:
+          type: string
+          enum: [up, down, stable]
+        sparkline:
+          type: array
+          items:
+            type: number
+
+    SimulationInput:
+      type: object
+      required: [scenarioId]
+      properties:
+        scenarioId:
+          type: string
+        severity:
+          type: number
+
+    SimulationResult:
+      type: object
+      required: [systemState, riskScores, procurementPlan, reserveAction, impactSummary]
+      properties:
+        systemState:
+          type: string
+          enum: [NOMINAL, ELEVATED, CRITICAL]
+        riskScores:
+          type: array
+          items:
+            $ref: "#/components/schemas/RiskScore"
+        procurementPlan:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcurementRecommendation"
+        reserveAction:
+          type: string
+        impactSummary:
+          type: string
+
+    # ── Risk ───────────────────────────────────────────────────────
+    RiskScore:
+      type: object
+      required: [id, corridor, score, level, trend, lastUpdated]
+      properties:
+        id:
+          type: integer
+        corridor:
+          type: string
+        score:
+          type: number
+        level:
+          type: string
+          enum: [LOW, MODERATE, HIGH, CRITICAL]
+        trend:
+          type: string
+          enum: [increasing, decreasing, stable]
+        lastUpdated:
+          type: string
+
+    NewsSignal:
+      type: object
+      required: [id, timestamp, headline, source, corridor, severity, extractedRisk]
+      properties:
+        id:
+          type: integer
+        timestamp:
+          type: string
+        headline:
+          type: string
+        source:
+          type: string
+        corridor:
+          type: string
+        severity:
+          type: string
+          enum: [LOW, MODERATE, HIGH, CRITICAL]
+        extractedRisk:
+          type: string
+
+    SupplierRisk:
+      type: object
+      required: [id, supplier, country, share, riskScore, riskLevel, primaryRoute, notes]
+      properties:
+        id:
+          type: integer
+        supplier:
+          type: string
+        country:
+          type: string
+        share:
+          type: number
+        riskScore:
+          type: number
+        riskLevel:
+          type: string
+          enum: [LOW, MODERATE, HIGH, CRITICAL]
+        primaryRoute:
+          type: string
+        notes:
+          type: string
+
+    # ── Scenario ───────────────────────────────────────────────────
+    Scenario:
+      type: object
+      required: [id, name, description, icon, defaultSeverity, category]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        defaultSeverity:
+          type: number
+        category:
+          type: string
+
+    ScenarioInput:
+      type: object
+      required: [scenarioId, severity]
+      properties:
+        scenarioId:
+          type: string
+        severity:
+          type: number
+
+    ScenarioResult:
+      type: object
+      required: [scenarioId, severity, impacts, beforeAfter]
+      properties:
+        scenarioId:
+          type: string
+        severity:
+          type: number
+        impacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScenarioImpact"
+        beforeAfter:
+          $ref: "#/components/schemas/BeforeAfter"
+
+    ScenarioImpact:
+      type: object
+      required: [metric, before, after, unit, delta, direction]
+      properties:
+        metric:
+          type: string
+        before:
+          type: number
+        after:
+          type: number
+        unit:
+          type: string
+        delta:
+          type: number
+        direction:
+          type: string
+          enum: [up, down, neutral]
+
+    BeforeAfter:
+      type: object
+      required: [refineryRunRate, fuelPriceDelta, powerStressIndex, gdpImpact]
+      properties:
+        refineryRunRate:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesPoint"
+        fuelPriceDelta:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesPoint"
+        powerStressIndex:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesPoint"
+        gdpImpact:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesPoint"
+
+    TimeSeriesPoint:
+      type: object
+      required: [date, value]
+      properties:
+        date:
+          type: string
+        value:
+          type: number
+
+    # ── Procurement ────────────────────────────────────────────────
+    ProcurementRecommendation:
+      type: object
+      required: [id, rank, supplier, country, route, spotPrice, tankerAvailability, portCongestion, gradeCompatibility, overallScore, reasoning, status]
+      properties:
+        id:
+          type: integer
+        rank:
+          type: integer
+        supplier:
+          type: string
+        country:
+          type: string
+        route:
+          type: string
+        spotPrice:
+          type: number
+        tankerAvailability:
+          type: number
+        portCongestion:
+          type: number
+        gradeCompatibility:
+          type: number
+        overallScore:
+          type: number
+        reasoning:
+          type: string
+        status:
+          type: string
+          enum: [RECOMMENDED, VIABLE, MARGINAL, AVOID]
+
+    ProcurementInput:
+      type: object
+      required: [scenarioId]
+      properties:
+        scenarioId:
+          type: string
+        constraints:
+          type: array
+          items:
+            type: string
+
+    CrudeSource:
+      type: object
+      required: [id, supplier, country, gradeType, typicalVolume, currentPrice]
+      properties:
+        id:
+          type: integer
+        supplier:
+          type: string
+        country:
+          type: string
+        gradeType:
+          type: string
+        typicalVolume:
+          type: number
+        currentPrice:
+          type: number
+
+    # ── Reserve ────────────────────────────────────────────────────
+    ReserveStatus:
+      type: object
+      required: [currentDays, capacityDays, fillPercent, drawdownRate, recommendedAction, riskOfDepletion, replenishmentWindow]
+      properties:
+        currentDays:
+          type: number
+        capacityDays:
+          type: number
+        fillPercent:
+          type: number
+        drawdownRate:
+          type: number
+        recommendedAction:
+          type: string
+        riskOfDepletion:
+          type: string
+          enum: [LOW, MODERATE, HIGH, CRITICAL]
+        replenishmentWindow:
+          type: string
+
+    ReserveOptimizeInput:
+      type: object
+      required: [scenarioId, drawdownRateMbpd]
+      properties:
+        scenarioId:
+          type: string
+        drawdownRateMbpd:
+          type: number
+
+    ReserveOptimizeResult:
+      type: object
+      required: [recommendedDrawdownRate, depletionDate, replenishmentStart, actionBanner]
+      properties:
+        recommendedDrawdownRate:
+          type: number
+        depletionDate:
+          type: ["string", "null"]
+        repletionDate:
+          type: ["string", "null"]
+        replenishmentStart:
+          type: string
+        actionBanner:
+          type: string
+
+    DrawdownDataPoint:
+      type: object
+      required: [date, reserveLevel, demandForecast, supplyGap]
+      properties:
+        date:
+          type: string
+        reserveLevel:
+          type: number
+        demandForecast:
+          type: number
+        supplyGap:
+          type: number
+
+    # ── Digital Twin ───────────────────────────────────────────────
+    MapNode:
+      type: object
+      required: [id, name, type, lat, lon, riskLevel, details]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [port, refinery, storage, strait, terminal]
+        lat:
+          type: number
+        lon:
+          type: number
+        riskLevel:
+          type: string
+          enum: [LOW, MODERATE, HIGH, CRITICAL]
+        details:
+          type: string
+
+    ShippingCorridor:
+      type: object
+      required: [id, name, from, to, riskLevel, riskScore, volumeMbpd, status, waypoints]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        riskLevel:
+          type: string
+          enum: [LOW, MODERATE, HIGH, CRITICAL]
+        riskScore:
+          type: number
+        volumeMbpd:
+          type: number
+        status:
+          type: string
+          enum: [OPEN, RESTRICTED, CLOSED]
+        waypoints:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+
+    WhatIfInput:
+      type: object
+      required: [targetId, targetType, disruptionType]
+      properties:
+        targetId:
+          type: string
+        targetType:
+          type: string
+          enum: [node, corridor]
+        disruptionType:
+          type: string
+
+    WhatIfResult:
+      type: object
+      required: [targetId, impactSummary, affectedVolumeMbpd, alternativeRoutes, recommendedAction]
+      properties:
+        targetId:
+          type: string
+        impactSummary:
+          type: string
+        affectedVolumeMbpd:
+          type: number
+        alternativeRoutes:
+          type: array
+          items:
+            type: string
+        recommendedAction:
+          type: string

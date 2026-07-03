@@ -22,6 +22,9 @@ tags:
     description: Strategic reserve optimization
   - name: digital-twin
     description: Supply chain digital twin
+  - name: system
+    description: System configuration and connectivity diagnostics
+
 
 paths:
   /healthz:
@@ -315,6 +318,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WhatIfResult"
+
+  /system/config:
+    get:
+      operationId: getSystemConfig
+      tags: [system]
+      summary: Get system configuration and status of databases and APIs
+      responses:
+        "200":
+          description: System configuration and status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemConfigResponse"
 
 components:
   schemas:
@@ -742,4 +758,73 @@ components:
           items:
             type: string
         recommendedAction:
+          type: string
+
+    SystemConfigResponse:
+      type: object
+      required: [databases, apis]
+      properties:
+        databases:
+          type: array
+          items:
+            $ref: "#/components/schemas/DatabaseStatus"
+        apis:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiServiceStatus"
+
+    DatabaseStatus:
+      type: object
+      required: [name, purpose, type, host, status, error, tables]
+      properties:
+        name:
+          type: string
+        purpose:
+          type: string
+        type:
+          type: string
+        host:
+          type: string
+        status:
+          type: string
+          enum: [CONNECTED, DISCONNECTED]
+        error:
+          type: string
+          nullable: true
+        tables:
+          type: array
+          items:
+            $ref: "#/components/schemas/DatabaseTableInfo"
+
+
+    ApiServiceStatus:
+      type: object
+      required: [name, purpose, endpoint, authStatus, connectivityStatus, latencyMs]
+      properties:
+        name:
+          type: string
+        purpose:
+          type: string
+        endpoint:
+          type: string
+        authStatus:
+          type: string
+          enum: [ACTIVE, INACTIVE, INVALID, EXPIRED]
+        connectivityStatus:
+          type: string
+          enum: [ONLINE, OFFLINE, DEGRADED]
+        latencyMs:
+          type: number
+
+    DatabaseTableInfo:
+      type: object
+      required: [name, purpose, recordsCount, mappedModel]
+      properties:
+        name:
+          type: string
+        purpose:
+          type: string
+        recordsCount:
+          type: integer
+        mappedModel:
           type: string

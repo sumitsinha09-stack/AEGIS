@@ -5,7 +5,7 @@ import {
   useRunWhatIf,
 } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Globe, Crosshair, Info, MapPin, Waves } from "lucide-react";
+import { Globe, Crosshair, MapPin, Waves, Sparkles, Filter, Layers, Sun, Eye, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type AnyItem = Record<string, any>;
@@ -34,7 +34,6 @@ function HitPolyline({
 }: { points: string; onClick: () => void; isSelected: boolean }) {
   return (
     <>
-      {/* Wide transparent hit target */}
       <polyline
         points={points}
         fill="none"
@@ -44,7 +43,6 @@ function HitPolyline({
         style={{ pointerEvents: "stroke" }}
         onClick={onClick}
       />
-      {/* Visible line — no pointer events, so clicks go through to hit target */}
       <polyline
         points={points}
         fill="none"
@@ -63,6 +61,9 @@ export default function DigitalTwin() {
   const [selectedItem, setSelectedItem] = useState<AnyItem | null>(null);
   const [selectedKind, setSelectedKind] = useState<"node" | "corridor" | null>(null);
   const [whatIfResult, setWhatIfResult] = useState<any>(null);
+  const [weatherLayer, setWeatherLayer] = useState(false);
+  const [satelliteLayer, setSatelliteLayer] = useState(false);
+  const [trafficLayer, setTrafficLayer] = useState(true);
   const whatIf = useRunWhatIf();
 
   if (isLoadingNodes || isLoadingCorridors || !nodes || !corridors) {
@@ -93,22 +94,43 @@ export default function DigitalTwin() {
   };
 
   return (
-    <div className="space-y-4" style={{ height: "calc(100vh - 9rem)" }}>
-      <div>
-        <h2 className="text-2xl font-bold">Digital Twin</h2>
-        <p className="text-sm font-mono mt-0.5" style={{ color: "hsl(355 8% 55%)" }}>
-          LIVE TOPOLOGICAL MAP — CLICK ANY NODE OR CORRIDOR TO INSPECT
-        </p>
+    <div className="space-y-4" style={{ height: "calc(100vh - 10rem)" }}>
+      {/* Redesigned top heading */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">GIS Digital Twin</h2>
+          <p className="text-sm font-mono mt-0.5" style={{ color: "hsl(355 8% 55%)" }}>
+            REAL-TIME TOPOLOGICAL MAP & TELEMETRY STREAM
+          </p>
+        </div>
+
+        {/* Map Layers Selector */}
+        <div className="flex items-center gap-2 bg-muted/40 border border-border/10 p-0.5 rounded-xl text-[10px] font-mono text-white">
+          <span className="px-2.5 text-muted-foreground flex items-center gap-1"><Layers className="w-3 h-3" /> LAYERS:</span>
+          {[
+            { id: "weather", active: weatherLayer, set: setWeatherLayer, label: "WEATHER" },
+            { id: "satellite", active: satelliteLayer, set: setSatelliteLayer, label: "SAT" },
+            { id: "traffic", active: trafficLayer, set: setTrafficLayer, label: "TRAFFIC" },
+          ].map(lay => (
+            <button
+              key={lay.id}
+              onClick={() => lay.set(!lay.active)}
+              className={`px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1 ${lay.active ? "bg-primary text-white font-bold" : "text-muted-foreground"}`}
+            >
+              <Eye className="w-3 h-3" /> {lay.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-1 min-h-0"
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 flex-1 min-h-0"
         style={{ height: "calc(100% - 60px)" }}>
 
-        {/* ── MAP PANEL ─────────────────────────────────────────── */}
+        {/* ── MAP PANEL ── */}
         <div className="lg:col-span-3 rounded-2xl overflow-hidden relative"
           style={{ background: "#06020a", border: "1px solid rgba(217,64,52,0.2)" }}>
 
-          {/* Grid */}
+          {/* Grid lines */}
           <div className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: "linear-gradient(rgba(217,64,52,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(217,64,52,0.04) 1px, transparent 1px)",
@@ -119,27 +141,40 @@ export default function DigitalTwin() {
           <div className="absolute inset-0 pointer-events-none"
             style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(217,64,52,0.04) 0%, transparent 65%)" }} />
 
+          {/* Satellite radar grid sweep overlay */}
+          {satelliteLayer && (
+            <div className="absolute inset-0 pointer-events-none opacity-40"
+              style={{
+                backgroundImage: "radial-gradient(circle, transparent 50%, rgba(217,64,52,0.05) 51%, transparent 52%)",
+                backgroundSize: "200px 200px",
+                animation: "cardShine 12s linear infinite"
+              }} />
+          )}
+
           <svg
             className="w-full h-full"
             viewBox="0 0 1000 500"
             preserveAspectRatio="xMidYMid meet"
             style={{ display: "block" }}>
 
-            {/* Landmasses (simplified blobs for context) */}
-            <g opacity={0.07} fill="rgba(255,255,255,1)" stroke="rgba(255,255,255,0.4)" strokeWidth={0.5}>
-              {/* Arabian Peninsula */}
+            {/* Landmasses */}
+            <g opacity={satelliteLayer ? 0.15 : 0.07} fill={satelliteLayer ? "#1e293b" : "rgba(255,255,255,1)"} stroke="rgba(255,255,255,0.4)" strokeWidth={0.5}>
               <ellipse cx={530} cy={230} rx={80} ry={80} />
-              {/* Persian Gulf area */}
               <ellipse cx={520} cy={165} rx={55} ry={30} />
-              {/* India */}
               <ellipse cx={680} cy={270} rx={60} ry={100} />
-              {/* East Africa */}
               <ellipse cx={355} cy={240} rx={35} ry={90} />
-              {/* Horn of Africa */}
               <ellipse cx={390} cy={185} rx={40} ry={35} />
-              {/* Red Sea coast */}
               <ellipse cx={420} cy={130} rx={30} ry={60} />
             </g>
+
+            {/* Weather Wind Current Overlay */}
+            {weatherLayer && (
+              <g opacity={0.3} stroke="#94a3b8" strokeWidth={1} fill="none" style={{ pointerEvents: "none" }}>
+                {/* Wind lines */}
+                <path d="M 450,140 Q 480,120 520,130 T 560,110" />
+                <path d="M 680,240 Q 710,220 750,230 T 790,210" />
+              </g>
+            )}
 
             {/* Corridors */}
             {corridors.map((c: AnyItem) => {
@@ -178,13 +213,21 @@ export default function DigitalTwin() {
                       <animate attributeName="stroke-dashoffset" from="24" to="0" dur="1.5s" repeatCount="indefinite" />
                     </polyline>
                   )}
-                  {/* Hit + visible line */}
+                  {/* Traffic active vessel points */}
+                  {trafficLayer && c.status === "OPEN" && (() => {
+                    const mid = Math.floor(c.waypoints.length / 2);
+                    const { x, y } = toSvg(c.waypoints[mid][0], c.waypoints[mid][1]);
+                    return (
+                      <circle cx={x} cy={y} r={3} fill="#ffffff" opacity={0.9} style={{ pointerEvents: "none" }}>
+                        <animate attributeName="opacity" values="0.2;1;0.2" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                    );
+                  })()}
                   <HitPolyline
                     points={points}
                     isSelected={isSelected}
                     onClick={() => selectCorridor(c)}
                   />
-                  {/* Selected highlight ring at midpoint */}
                   {isSelected && (() => {
                     const mid = Math.floor(c.waypoints.length / 2);
                     const { x, y } = toSvg(c.waypoints[mid][0], c.waypoints[mid][1]);
@@ -212,14 +255,9 @@ export default function DigitalTwin() {
                   transform={`translate(${x},${y})`}
                   className="cursor-pointer"
                   onClick={() => selectNode(node)}>
-
-                  {/* Hit target — wide transparent circle */}
                   <circle r={20} fill="transparent" style={{ pointerEvents: "all" }} />
-
-                  {/* Glow ring */}
                   <circle r={r + 8} fill={color} fillOpacity={isSelected ? 0.2 : 0.08} style={{ pointerEvents: "none" }} />
-
-                  {/* Pulse ring when selected */}
+                  
                   {isSelected && (
                     <circle r={r + 4} fill="none" stroke={color} strokeWidth={1.5} style={{ pointerEvents: "none" }}>
                       <animate attributeName="r" values={`${r + 4};${r + 14};${r + 4}`} dur="1.5s" repeatCount="indefinite" />
@@ -227,7 +265,6 @@ export default function DigitalTwin() {
                     </circle>
                   )}
 
-                  {/* Main dot */}
                   <circle
                     r={r}
                     fill={color}
@@ -236,7 +273,6 @@ export default function DigitalTwin() {
                     style={{ pointerEvents: "none", filter: `drop-shadow(0 0 4px ${color})` }}
                   />
 
-                  {/* Label */}
                   <text
                     y={-(r + 8)}
                     textAnchor="middle"
@@ -268,26 +304,18 @@ export default function DigitalTwin() {
               </span>
             ))}
           </div>
-
-          {/* Type indicator */}
-          <div className="absolute top-4 right-4 px-3 py-2 rounded-xl text-[9px] font-mono"
-            style={{ background: "rgba(6,2,10,0.85)", border: "1px solid rgba(217,64,52,0.15)", color: "hsl(355 8% 55%)" }}>
-            {selectedItem
-              ? `SELECTED: ${selectedKind?.toUpperCase()} — ${selectedItem.name}`
-              : "CLICK NODE OR CORRIDOR TO INSPECT"}
-          </div>
         </div>
 
-        {/* ── INFO PANEL ────────────────────────────────────────── */}
-        <div className="rounded-2xl overflow-hidden flex flex-col"
+        {/* ── INFO PANEL (Spans 2 columns) ── */}
+        <div className="lg:col-span-2 rounded-2xl overflow-hidden flex flex-col"
           style={{ background: "rgba(20,6,8,0.8)", border: "1px solid rgba(217,64,52,0.18)" }}>
 
           <div className="px-4 py-3 border-b flex items-center gap-2 shrink-0"
             style={{ borderColor: "rgba(217,64,52,0.12)", background: "rgba(217,64,52,0.05)" }}>
             {selectedKind === "corridor"
-              ? <Waves className="w-4 h-4" style={{ color: "hsl(2 78% 65%)" }} />
-              : <MapPin className="w-4 h-4" style={{ color: "hsl(2 78% 65%)" }} />}
-            <span className="text-[10px] font-mono font-bold tracking-[0.15em]" style={{ color: "hsl(2 78% 65%)" }}>
+              ? <Waves className="w-4 h-4 text-primary" />
+              : <MapPin className="w-4 h-4 text-primary" />}
+            <span className="text-[10px] font-mono font-bold tracking-[0.15em] text-primary">
               {selectedItem ? "INTELLIGENCE PANEL" : "SELECT AN ELEMENT"}
             </span>
           </div>
@@ -302,16 +330,14 @@ export default function DigitalTwin() {
                   exit={{ opacity: 0, x: -12 }}
                   className="space-y-4">
 
-                  {/* Title */}
                   <div>
-                    <div className="text-[9px] font-mono tracking-widest mb-1" style={{ color: "hsl(2 78% 60%)" }}>
+                    <div className="text-[9px] font-mono tracking-widest mb-1 text-primary">
                       {selectedKind === "corridor" ? "SHIPPING CORRIDOR" : `NODE · ${selectedItem.type?.toUpperCase()}`}
                     </div>
                     <h3 className="text-lg font-bold text-white leading-tight">
                       {selectedItem.name}
                     </h3>
 
-                    {/* Risk badge */}
                     {(() => {
                       const color = riskColor(selectedItem.riskLevel);
                       return (
@@ -323,13 +349,11 @@ export default function DigitalTwin() {
                     })()}
                   </div>
 
-                  {/* Details */}
                   <div className="rounded-xl p-3 text-xs leading-relaxed"
-                    style={{ background: "rgba(217,64,52,0.05)", border: "1px solid rgba(217,64,52,0.12)", color: "hsl(0 0% 75%)" }}>
+                    style={{ background: "rgba(217,64,52,0.04)", border: "1px solid rgba(217,64,52,0.1)", color: "hsl(0 0% 75%)" }}>
                     {selectedItem.details || `Volume: ${selectedItem.volumeMbpd} Mbpd`}
                   </div>
 
-                  {/* Node-specific metadata */}
                   {selectedKind === "node" && selectedItem.lat && (
                     <div className="grid grid-cols-2 gap-2">
                       {[
@@ -338,9 +362,9 @@ export default function DigitalTwin() {
                         ...(selectedItem.capacityMbpd ? [{ label: "CAPACITY", value: `${selectedItem.capacityMbpd} Mbpd` }] : []),
                         ...(selectedItem.utilization ? [{ label: "UTILIZATION", value: `${selectedItem.utilization}%` }] : []),
                       ].map(item => (
-                        <div key={item.label} className="rounded-lg px-3 py-2"
-                          style={{ background: "rgba(217,64,52,0.04)", border: "1px solid rgba(217,64,52,0.1)" }}>
-                          <div className="text-[8px] font-mono tracking-widest mb-0.5" style={{ color: "hsl(355 8% 48%)" }}>
+                        <div key={item.label} className="rounded-lg px-3 py-2 border border-border/5"
+                          style={{ background: "rgba(255,255,255,0.01)" }}>
+                          <div className="text-[8px] font-mono tracking-widest mb-0.5 text-muted-foreground">
                             {item.label}
                           </div>
                           <div className="text-xs font-mono font-bold text-white">{item.value}</div>
@@ -349,104 +373,74 @@ export default function DigitalTwin() {
                     </div>
                   )}
 
-                  {/* What-If buttons */}
-                  <div>
+                  {/* What-If triggers */}
+                  <div className="pt-4 border-t border-border/5">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <Crosshair className="w-3 h-3" style={{ color: "hsl(2 78% 60%)" }} />
-                      <span className="text-[9px] font-mono tracking-widest" style={{ color: "hsl(355 8% 50%)" }}>
-                        EXECUTE WHAT-IF SIMULATION
+                      <Crosshair className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-[9px] font-mono tracking-widest text-muted-foreground">
+                        RUN WHAT-IF DISRUPTION MODEL
                       </span>
                     </div>
+                    
                     <div className="grid grid-cols-2 gap-2">
-                      <motion.button
-                        whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                        onClick={() => handleWhatIf("CLOSURE")}
-                        disabled={whatIf.isPending}
-                        className="py-2 px-3 rounded-xl text-[9px] font-mono font-bold tracking-wider transition-all disabled:opacity-50"
-                        style={{
-                          background: "rgba(239,68,68,0.1)",
-                          border: "1px solid rgba(239,68,68,0.3)",
-                          color: "#ef4444",
-                        }}>
-                        SIMULATE CLOSURE
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                        onClick={() => handleWhatIf("DELAY")}
-                        disabled={whatIf.isPending}
-                        className="py-2 px-3 rounded-xl text-[9px] font-mono font-bold tracking-wider transition-all disabled:opacity-50"
-                        style={{
-                          background: "rgba(245,158,11,0.1)",
-                          border: "1px solid rgba(245,158,11,0.3)",
-                          color: "#f59e0b",
-                        }}>
-                        SIMULATE DELAY
-                      </motion.button>
+                      {["closure", "congestion", "reroute", "strike"].map(type => (
+                        <button
+                          key={type}
+                          onClick={() => handleWhatIf(type)}
+                          disabled={whatIf.isPending}
+                          className="py-2.5 rounded-xl border border-border/10 hover:border-primary/30 bg-muted/20 hover:bg-primary/5 text-[10px] font-mono font-bold text-slate-300 hover:text-white transition-all disabled:opacity-50"
+                        >
+                          {type.toUpperCase()}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* What-If Result */}
+                  {/* What-If Report results */}
                   <AnimatePresence>
                     {whatIfResult && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="rounded-xl overflow-hidden"
-                        style={{ background: "rgba(217,64,52,0.07)", border: "1px solid rgba(217,64,52,0.25)" }}>
-                        <div className="px-4 pt-3 pb-1 flex items-center gap-2">
-                          <Info className="w-3.5 h-3.5" style={{ color: "hsl(2 78% 65%)" }} />
-                          <span className="text-[9px] font-mono font-bold tracking-widest" style={{ color: "hsl(2 78% 65%)" }}>
-                            SIMULATION RESULT
-                          </span>
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-xl p-4.5 border border-primary/20 space-y-3"
+                        style={{ background: "linear-gradient(135deg, rgba(217,64,52,0.06) 0%, rgba(20,6,8,0.5) 100%)" }}
+                      >
+                        <div className="flex items-center gap-1.5 font-mono text-[9px] font-bold text-primary">
+                          <Sparkles className="w-3.5 h-3.5 animate-pulse" /> SIMULATION COMPLETED
                         </div>
-                        <div className="px-4 pb-4 space-y-3">
-                          <p className="text-xs font-medium text-white leading-snug">{whatIfResult.impactSummary}</p>
-                          <div className="grid grid-cols-1 gap-1.5 text-[9px] font-mono"
-                            style={{ color: "hsl(355 8% 60%)" }}>
-                            <div>AFFECTED VOL:
-                              <span className="text-white ml-1 font-bold">{whatIfResult.affectedVolumeMbpd} Mbpd</span>
-                            </div>
-                            <div>ALT ROUTES:
-                              <span className="text-white ml-1 font-bold">{whatIfResult.alternativeRoutes?.join(", ")}</span>
-                            </div>
+                        <div className="text-[11px] font-mono leading-relaxed text-slate-300">
+                          {whatIfResult.analysis}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2.5 pt-2 text-[10px] font-mono border-t border-border/5">
+                          <div>
+                            <div className="text-muted-foreground">REFINERY RUN RATE</div>
+                            <div className="font-bold text-white">{whatIfResult.metrics.refineryRunRate}%</div>
                           </div>
-                          <div className="pt-2 border-t" style={{ borderColor: "rgba(217,64,52,0.15)" }}>
-                            <div className="text-[8px] font-mono tracking-widest mb-1" style={{ color: "hsl(355 8% 50%)" }}>
-                              RECOMMENDATION
-                            </div>
-                            <p className="text-xs font-bold" style={{ color: "hsl(2 78% 65%)" }}>
-                              {whatIfResult.recommendedAction}
-                            </p>
+                          <div>
+                            <div className="text-muted-foreground">POWER STRESS INDEX</div>
+                            <div className="font-bold text-white">{whatIfResult.metrics.powerStressIndex}/100</div>
                           </div>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
+
                 </motion.div>
               ) : (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="h-full flex flex-col items-center justify-center text-center py-12 gap-4">
-                  <div className="p-4 rounded-2xl"
-                    style={{ background: "rgba(217,64,52,0.06)", border: "1px solid rgba(217,64,52,0.12)" }}>
-                    <Globe className="w-10 h-10" style={{ color: "rgba(217,64,52,0.35)" }} />
+                <div className="h-full flex flex-col items-center justify-center gap-4 text-center py-16">
+                  <div className="p-4 rounded-2xl bg-muted/30 border border-border/5 text-muted-foreground/30">
+                    <Globe className="w-10 h-10 animate-pulse" />
                   </div>
-                  <div>
-                    <div className="font-bold text-white mb-1 font-display">
-                      No Element Selected
-                    </div>
-                    <p className="text-xs font-mono leading-relaxed" style={{ color: "hsl(355 8% 50%)" }}>
-                      Click any node or shipping corridor on the map to view intelligence and run simulations
-                    </p>
+                  <div className="font-mono">
+                    <div className="font-bold text-white mb-1">SELECT AN ELEMENT</div>
+                    <p className="text-xs text-muted-foreground">Click on any map node or shipping corridor to track live telemetry.</p>
                   </div>
-                </motion.div>
+                </div>
               )}
             </AnimatePresence>
           </div>
         </div>
+
       </div>
     </div>
   );

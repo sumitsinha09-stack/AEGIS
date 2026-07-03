@@ -109,3 +109,32 @@ class ShippingCorridorResponse(CamelModel):
             "waypoints": obj.waypoints,
         }
         return cls(**data)
+
+class DatabaseTableInfo(CamelModel):
+    name: str
+    purpose: str
+    records_count: int
+    mapped_model: str
+
+class DatabaseStatus(CamelModel):
+    name: str
+    purpose: str
+    type: str
+    host: str
+    status: str
+    error: Optional[str] = None
+    tables: List[DatabaseTableInfo]
+
+class ApiServiceStatus(CamelModel):
+    name: str
+    purpose: str
+    endpoint: str
+    auth_status: str
+    connectivity_status: str
+    latency_ms: float
+
+class SystemConfigResponse(CamelModel):
+    databases: List[DatabaseStatus]
+    apis: List[ApiServiceStatus]
+
+

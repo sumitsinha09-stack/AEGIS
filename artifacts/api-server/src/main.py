@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import health, overview, risk, digital_twin, procurement, reserve, scenarios
+from .routes import health, overview, risk, digital_twin, procurement, reserve, scenarios, system
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +26,7 @@ app.include_router(digital_twin.router, prefix="/api")
 app.include_router(procurement.router, prefix="/api")
 app.include_router(reserve.router, prefix="/api")
 app.include_router(scenarios.router, prefix="/api")
+app.include_router(system.router, prefix="/api")
 
 @app.on_event("startup")
 def startup_event():

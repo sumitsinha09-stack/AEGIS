@@ -55,8 +55,8 @@
   --color-sidebar-accent-border: var(--sidebar-accent-border);
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -150,7 +150,7 @@
     @apply border-border;
   }
   body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     @apply antialiased bg-background text-foreground;
     background:
       radial-gradient(ellipse 80% 60% at 10% -10%, hsl(2 78% 57% / 0.07) 0%, transparent 60%),
@@ -159,10 +159,10 @@
     min-height: 100vh;
   }
   h1, h2, h3, h4 {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-display);
   }
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
   }
 }
 
@@ -252,3 +252,15 @@ input[type="range"] { accent-color: hsl(2 78% 57%); }
   animation: cardShine 4s ease-in-out infinite;
   pointer-events: none;
 }
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-marquee {
+  display: flex;
+  gap: 3rem;
+  animation: marquee 30s linear infinite;
+}
+

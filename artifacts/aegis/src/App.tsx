@@ -12,6 +12,9 @@ import Scenarios from "@/pages/scenarios";
 import Procurement from "@/pages/procurement";
 import Reserve from "@/pages/reserve";
 import DigitalTwin from "@/pages/digital-twin";
+import Settings from "@/pages/settings";
+import Analytics from "@/pages/analytics";
+import AICommand from "@/pages/ai-command";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +35,9 @@ function Router() {
         <Route path="/procurement" component={Procurement} />
         <Route path="/reserve" component={Reserve} />
         <Route path="/digital-twin" component={DigitalTwin} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/analytics" component={Analytics} />
+        <Route path="/ai-command" component={AICommand} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

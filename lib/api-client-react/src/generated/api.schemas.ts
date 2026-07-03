@@ -353,3 +353,61 @@ export interface WhatIfResult {
   recommendedAction: string;
 }
 
+export type DatabaseStatusStatus = typeof DatabaseStatusStatus[keyof typeof DatabaseStatusStatus];
+
+
+export const DatabaseStatusStatus = {
+  CONNECTED: 'CONNECTED',
+  DISCONNECTED: 'DISCONNECTED',
+} as const;
+
+export interface DatabaseTableInfo {
+  name: string;
+  purpose: string;
+  recordsCount: number;
+  mappedModel: string;
+}
+
+export interface DatabaseStatus {
+  name: string;
+  purpose: string;
+  type: string;
+  host: string;
+  status: DatabaseStatusStatus;
+  error: string | null;
+  tables: DatabaseTableInfo[];
+}
+
+export type ApiServiceStatusAuthStatus = typeof ApiServiceStatusAuthStatus[keyof typeof ApiServiceStatusAuthStatus];
+
+
+export const ApiServiceStatusAuthStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  INVALID: 'INVALID',
+  EXPIRED: 'EXPIRED',
+} as const;
+
+export type ApiServiceStatusConnectivityStatus = typeof ApiServiceStatusConnectivityStatus[keyof typeof ApiServiceStatusConnectivityStatus];
+
+
+export const ApiServiceStatusConnectivityStatus = {
+  ONLINE: 'ONLINE',
+  OFFLINE: 'OFFLINE',
+  DEGRADED: 'DEGRADED',
+} as const;
+
+export interface ApiServiceStatus {
+  name: string;
+  purpose: string;
+  endpoint: string;
+  authStatus: ApiServiceStatusAuthStatus;
+  connectivityStatus: ApiServiceStatusConnectivityStatus;
+  latencyMs: number;
+}
+
+export interface SystemConfigResponse {
+  databases: DatabaseStatus[];
+  apis: ApiServiceStatus[];
+}
+

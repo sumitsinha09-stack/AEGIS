@@ -338,3 +338,32 @@ export const RunWhatIfResponse = zod.object({
 })
 
 
+/**
+ * @summary Get system configuration and status of databases and APIs
+ */
+export const GetSystemConfigResponse = zod.object({
+  "databases": zod.array(zod.object({
+  "name": zod.string(),
+  "purpose": zod.string(),
+  "type": zod.string(),
+  "host": zod.string(),
+  "status": zod.enum(['CONNECTED', 'DISCONNECTED']),
+  "error": zod.string().nullable(),
+  "tables": zod.array(zod.object({
+  "name": zod.string(),
+  "purpose": zod.string(),
+  "recordsCount": zod.number(),
+  "mappedModel": zod.string()
+}))
+})),
+  "apis": zod.array(zod.object({
+  "name": zod.string(),
+  "purpose": zod.string(),
+  "endpoint": zod.string(),
+  "authStatus": zod.enum(['ACTIVE', 'INACTIVE', 'INVALID', 'EXPIRED']),
+  "connectivityStatus": zod.enum(['ONLINE', 'OFFLINE', 'DEGRADED']),
+  "latencyMs": zod.number()
+}))
+})
+
+

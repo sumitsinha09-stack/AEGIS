@@ -261,6 +261,6 @@ input[type="range"] { accent-color: hsl(2 78% 57%); }
 .animate-marquee {
   display: flex;
   gap: 3rem;
-  animation: marquee 30s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 

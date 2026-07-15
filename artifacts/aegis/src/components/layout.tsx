@@ -187,9 +187,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Top Control Bar */}
-        <header className="shrink-0 h-16 flex items-center justify-between px-6 border-b"
+        <header className="shrink-0 h-16 flex items-center justify-between px-6 border-b relative z-30"
           style={{
-            background: "rgba(13,4,6,0.8)",
+            background: "rgba(13,4,6,0.95)",
             backdropFilter: "blur(16px)",
             borderColor: "rgba(217,64,52,0.12)",
           }}>
@@ -265,8 +265,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2.5 w-80 bg-popover border border-border/15 rounded-2xl p-4 shadow-2xl z-50 space-y-3 font-mono"
-                      style={{ background: "hsl(355 28% 8%)", borderColor: "rgba(217,64,52,0.2)" }}
+                      className="absolute right-0 mt-2.5 w-80 border border-border/15 rounded-2xl p-4 shadow-2xl z-50 space-y-3 font-mono"
+                      style={{ background: "#140608", borderColor: "rgba(217,64,52,0.2)" }}
                     >
                       <div className="text-[10px] font-bold text-primary tracking-widest uppercase border-b border-border/5 pb-2">
                         System Alerts Feed

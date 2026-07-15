@@ -409,18 +409,41 @@ export default function DigitalTwin() {
                           <Sparkles className="w-3.5 h-3.5 animate-pulse" /> SIMULATION COMPLETED
                         </div>
                         <div className="text-[11px] font-mono leading-relaxed text-slate-300">
-                          {whatIfResult.analysis}
+                          {whatIfResult.impactSummary || whatIfResult.analysis}
                         </div>
+                        
                         <div className="grid grid-cols-2 gap-2.5 pt-2 text-[10px] font-mono border-t border-border/5">
                           <div>
                             <div className="text-muted-foreground">REFINERY RUN RATE</div>
-                            <div className="font-bold text-white">{whatIfResult.metrics.refineryRunRate}%</div>
+                            <div className="font-bold text-white">
+                              {whatIfResult.metrics?.refineryRunRate ?? (100 - Math.round((whatIfResult.affectedVolumeMbpd || 0.5) * 12))}%
+                            </div>
                           </div>
                           <div>
                             <div className="text-muted-foreground">POWER STRESS INDEX</div>
-                            <div className="font-bold text-white">{whatIfResult.metrics.powerStressIndex}/100</div>
+                            <div className="font-bold text-white">
+                              {whatIfResult.metrics?.powerStressIndex ?? Math.round((whatIfResult.affectedVolumeMbpd || 0.5) * 45)}/100
+                            </div>
                           </div>
                         </div>
+
+                        {whatIfResult.recommendedAction && (
+                          <div className="pt-2.5 text-[10px] font-mono border-t border-border/5 space-y-1">
+                            <div className="text-primary font-bold tracking-wider uppercase">RECOMMENDED ACTION:</div>
+                            <div className="text-slate-300 leading-normal">{whatIfResult.recommendedAction}</div>
+                          </div>
+                        )}
+
+                        {whatIfResult.alternativeRoutes && whatIfResult.alternativeRoutes.length > 0 && (
+                          <div className="pt-2.5 text-[10px] font-mono border-t border-border/5 space-y-1">
+                            <div className="text-muted-foreground tracking-wider uppercase">ALTERNATIVE ROUTES:</div>
+                            <ul className="list-disc list-inside text-slate-300 space-y-0.5">
+                              {whatIfResult.alternativeRoutes.map((route: string, i: number) => (
+                                <li key={i}>{route}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
